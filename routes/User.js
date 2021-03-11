@@ -6,21 +6,13 @@ const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
 const SALT = 2
 const db = require('../models')
-const testpass = 'booger'
 
 router.use(bodyParser.urlencoded({ extended: false }))
 
 router.post('/register', async (req, res) => {
-  bcrypt.hash(testpass, SALT, function (err, hash) {
-    console.log(testpass)
-    const hashedtestpass = hash
-    console.log(hashedtestpass)
-  })
-
   console.log('Beginning user registration')
   try {
     const password = req.body.password
-    console.log(password)
     const hashedpassword = await bcrypt.hash(password, SALT)
 
     const newUser = await db.users.build({
