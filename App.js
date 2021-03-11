@@ -10,6 +10,9 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
+app.use(require('./routes/Post'))
+app.use(require('./routes/User'))
+
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
 })
