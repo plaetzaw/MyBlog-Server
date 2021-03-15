@@ -1,7 +1,9 @@
 const db = require('../models')
 const graphql = require('graphql')
+const bcrypt = require('bcrypt')
+const SALT = 2
 
-const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList, GraphQLSchema } = graphql
+const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLNonNull, GraphQLList, GraphQLSchema } = graphql
 
 const User = new GraphQLObjectType({
   name: 'User',
@@ -43,6 +45,12 @@ const User = new GraphQLObjectType({
         resolve (user) {
           return user.password
         }
+      },
+      blogs: {
+        type: new GraphQLList(Blog),
+        resolve (user) {
+          return user.getBlogs()
+        }
       }
     }
   }
@@ -63,26 +71,33 @@ const Blog = new GraphQLObjectType({
         type: GraphQLString,
         resolve (post) {
           return post.title
-        },
-        body: {
-          type: GraphQLString,
-          resolve (post) {
-            return post.body
-          }
-        },
-        author: {
-          type: GraphQLString,
-          resolve (post) {
-            return post.author
-          }
-        },
-        authorID: {
-          type: GraphQLInt,
-          resolve (post) {
-            return post.authorID
-          }
+        }
+      },
+      body: {
+        type: GraphQLString,
+        resolve (post) {
+          return post.body
+        }
+      },
+      author: {
+        type: GraphQLString,
+        resolve (post) {
+          return post.author
+        }
+      },
+      authorID: {
+        type: GraphQLInt,
+        resolve (post) {
+          return post.authorID
+        }
+      },
+      user: {
+        type: User,
+        resolve (post) {
+          return post.getUsers()
         }
       }
+
     }
   }
 })
@@ -115,6 +130,45 @@ const Query = new GraphQLObjectType({
         },
         resolve (root, args) {
           return db.blogs.findAll({ where: args })
+        }
+      }
+    }
+  }
+})
+
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  description: 'We making that new shit',
+  fields () {
+    return {
+      addUser: {
+        type: User,
+        args: {
+          firstname: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          lastname: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          username: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          email: {
+            type: new GraphQLNonNull(GraphQLString)
+          },
+          password: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve (_, args) {
+          return db.users.create()({
+            firstname: args.firstname,
+            lastname: args.lastname,
+            email: args.email,
+            username: args.username,
+            /// !OBVOIUSLY THIS WILL NEED TO BE HASHED
+            password: args.password
+          })
         }
       }
     }
