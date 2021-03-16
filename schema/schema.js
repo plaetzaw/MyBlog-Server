@@ -4,6 +4,17 @@ const bcrypt = require('bcrypt')
 const SALT = 2
 
 const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLNonNull, GraphQLList, GraphQLSchema } = graphql
+// query {
+//     users {
+//       id
+//       username
+//       blogs {
+//         id
+//         title
+//         authorID
+//       }
+//     }
+//   }
 
 const User = new GraphQLObjectType({
   name: 'User',
@@ -176,7 +187,8 @@ const Mutation = new GraphQLObjectType({
 })
 
 const Schema = new GraphQLSchema({
-  query: Query
+  query: Query,
+  mutation: Mutation
 
 })
 

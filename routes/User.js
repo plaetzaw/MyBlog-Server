@@ -31,6 +31,34 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
+  const email = req.body.email
+  const password = req.body.password
   console.log('Logging in user')
+  try {
+    const checkUser = await db.users.findOne({ email: email })
+    if (checkUser) {
+      const checkPassword = await bcrypt.compare(password, checkUser.password)
+      if (checkPassword === password) {
+        const username = checkUser.username
+        const id = checkUser.id
+        const email = checkUser.email
+
+        const user = {
+          id: id,
+          name: username,
+          email: email
+        }
+        const token = jwt.sign(user /// tokenhere)
+        )
+        res.json({ token: token })
+      } else {
+        res.status(403).json({ message: 'WRONG PASSWORD' })
+      }
+    } else {
+      res.status(404).json({ message: 'No user Found' })
+    }
+  } catch (e) {
+    res.status(500).json({ message: 'An error has occured', error: e })
+  }
 })
 module.exports = router
