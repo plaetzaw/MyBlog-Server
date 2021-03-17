@@ -10,12 +10,12 @@ const db = require('../models')
 router.use(bodyParser.urlencoded({ extended: false }))
 
 router.post('/register', async (req, res) => {
-  console.log('Beginning user registration')
+  // console.log('Beginning user registration')
   try {
     const password = req.body.password
-    console.log('starting pass', password)
+    // console.log('starting pass', password)
     const hashedpassword = await bcrypt.hash(password, SALT)
-    console.log('hashed pass', hashedpassword)
+    // console.log('hashed pass', hashedpassword)
 
     const newUser = await db.users.build({
       firstname: req.body.firstname,
@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
 
-  console.log('Logging in user', email)
+  // console.log('Logging in user', email)
   try {
     const checkUser = await db.users.findOne({
       where: {
@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
     // console.log(checkUser)
     if (checkUser) {
       const checkPassword = await bcrypt.compare(password, checkUser.password)
-      console.log('Password correct?', checkPassword)
+      // console.log('Password correct?', checkPassword)
       if (checkPassword === true) {
         const username = checkUser.username
         const id = checkUser.id
@@ -58,16 +58,18 @@ router.post('/login', async (req, res) => {
           email: email
         }
         const token = jwt.sign(user, process.env.JWT_SECRET)
-        res.json({ token: token })
+        // res.json({ token: token })
+        res.status(200).json({ message: 'USER LOGGED IN', token: token })
+
         console.log('User logged in', token)
       } else {
-        res.status(403).json({ message: 'WRONG PASSWORD' })
+        res.status(403).json({ message: 'WRONG PASSWORD, PLEASE CHECK YOUR PASSWORD' })
       }
     } else {
-      res.status(404).json({ message: 'No user Found' })
+      res.status(404).json({ message: 'NO EMAIL FOUND, PLEASE CHECK THE PROVIDED EMAIL' })
     }
   } catch (e) {
-    res.status(500).json({ message: 'An error has occured', error: e })
+    res.status(500).json({ message: 'AN UNKNOWN ERROR HAS OCCURED', error: e })
   }
 })
 module.exports = router
