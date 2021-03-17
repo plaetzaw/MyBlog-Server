@@ -1,10 +1,10 @@
 require('dotenv').config()
-
 const express = require('express')
 const router = express.Router()
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
 const SALT = 2
+const jwt = require('jsonwebtoken')
 const db = require('../models')
 
 router.use(bodyParser.urlencoded({ extended: false }))
@@ -13,7 +13,9 @@ router.post('/register', async (req, res) => {
   console.log('Beginning user registration')
   try {
     const password = req.body.password
+    console.log('starting pass', password)
     const hashedpassword = await bcrypt.hash(password, SALT)
+    console.log('hashed pass', hashedpassword)
 
     const newUser = await db.users.build({
       firstname: req.body.firstname,
@@ -22,7 +24,7 @@ router.post('/register', async (req, res) => {
       email: req.body.email,
       password: hashedpassword
     })
-    const savedUser = await newUser.save()
+    const savedUser = newUser.save()
 
     res.status(200).json({ message: 'New User Created', savedUser })
   } catch (e) {
@@ -33,12 +35,19 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
-  console.log('Logging in user')
+
+  console.log('Logging in user', email)
   try {
-    const checkUser = await db.users.findOne({ email: email })
+    const checkUser = await db.users.findOne({
+      where: {
+        email
+      }
+    })
+    // console.log(checkUser)
     if (checkUser) {
       const checkPassword = await bcrypt.compare(password, checkUser.password)
-      if (checkPassword === password) {
+      console.log('Password correct?', checkPassword)
+      if (checkPassword === true) {
         const username = checkUser.username
         const id = checkUser.id
         const email = checkUser.email
@@ -48,9 +57,9 @@ router.post('/login', async (req, res) => {
           name: username,
           email: email
         }
-        const token = jwt.sign(user /// tokenhere)
-        )
+        const token = jwt.sign(user, process.env.JWT_SECRET)
         res.json({ token: token })
+        console.log('User logged in', token)
       } else {
         res.status(403).json({ message: 'WRONG PASSWORD' })
       }
