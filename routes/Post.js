@@ -16,9 +16,9 @@ router.post('/createPost', async (req, res) => {
 
     })
 
-    const savedPost = await newPost.save()
+    await newPost.save()
 
-    res.status(200).json({ message: 'New Post Created', savedPost })
+    res.status(201).json({ message: 'New Post Created', newPost })
   } catch (e) {
     res.status(500).json({ message: 'An error has occured', error: e })
   }

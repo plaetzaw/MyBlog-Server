@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
 
         console.log('User logged in', token)
       } else {
-        res.status(403).json({ message: 'WRONG PASSWORD, PLEASE CHECK YOUR PASSWORD' })
+        res.status(400).json({ message: 'WRONG PASSWORD, PLEASE CHECK YOUR PASSWORD' })
       }
     } else {
       res.status(404).json({ message: 'NO EMAIL FOUND, PLEASE CHECK THE PROVIDED EMAIL' })
